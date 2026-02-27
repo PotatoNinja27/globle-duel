@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Globle Duel</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- LOBBY SCREEN -->
+    <div id="lobby-screen" class="screen active">
+        <div class="lobby-box">
+            <h1>🌍 Globle Duel</h1>
+            <p class="subtitle">2-player competitive country guessing</p>
+            <input id="player-name" type="text" placeholder="Your name" maxlength="20" />
+            <div class="lobby-buttons">
+                <button id="create-btn">Create Room</button>
+                <div class="divider">or</div>
+                <input id="room-code-input" type="text" placeholder="Room code" maxlength="5" />
+                <button id="join-btn">Join Room</button>
+            </div>
+            <p id="lobby-error" class="error-msg"></p>
+        </div>
+    </div>
+
+    <!-- WAITING SCREEN -->
+    <div id="waiting-screen" class="screen">
+        <div class="lobby-box">
+            <h2>Waiting for opponent...</h2>
+            <p>Share this code with your friend:</p>
+            <div id="display-code" class="room-code-display"></div>
+            <p class="hint">They enter this code on the main screen</p>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="screen">
+
+        <div id="top-bar">
+            <div id="turn-indicator"></div>
+            <div id="timer-wrap">
+                <div id="timer-bar-inner"></div>
+            </div>
+            <div id="timer-label">30s</div>
+        </div>
+
+        <div id="main-area">
+
+            <div id="map-wrap">
+                <div id="guess-input-wrap">
+                    <input id="guess-input" type="text" placeholder="Type a country..." autocomplete="off" />
+                    <ul id="autocomplete-list"></ul>
+                </div>
+                <div id="globe-container">
+                    <!-- SVG injected by map.js -->
+                </div>
+            </div>
+
+            <div id="sidebar">
+                <h3>Your Guesses</h3>
+                <ul id="guess-history"></ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- WIN OVERLAY -->
+    <div id="win-overlay" class="hidden">
+        <div class="win-box">
+            <div id="win-title"></div>
+            <div id="win-target"></div>
+            <button id="play-again-btn">Play Again</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
