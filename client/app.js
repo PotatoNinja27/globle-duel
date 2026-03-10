@@ -14,6 +14,15 @@ function showScreen(id) {
     document.getElementById(id).classList.add('active');
 }
 
+// small temporary toast
+function showToast(msg, duration = 3000) {
+    const div = document.createElement('div');
+    div.className = 'adjacent-toast';
+    div.textContent = msg;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), duration);
+}
+
 // --- Lobby ---
 document.getElementById('create-btn').addEventListener('click', () => {
     const name = getPlayerName();
@@ -58,9 +67,9 @@ socket.on('gameStart', ({ players, activePlayerId: apId }) => {
     startTimerBar(30);
 });
 
-socket.on('guessResult', ({ iso, name, distance, color, correct }) => {
+socket.on('guessResult', ({ iso, name, distance, color, correct, adjacent }) => {
     colorCountry(iso, color);
-    addGuessToHistory(name, distance, color);
+    addGuessToHistory(name, distance, color, adjacent);
     if (correct) return; // gameOver will handle it
 });
 
@@ -106,8 +115,29 @@ socket.on('error', ({ message }) => {
     }
 });
 
+socket.on('opponentWantsPlayAgain', () => {
+    document.getElementById('win-title').textContent = '🏳️ Opponent wants to play again!';
+    document.getElementById('play-again-btn').textContent = 'Play Again';
+});
+
+socket.on('gameRestart', ({ activePlayerId: apId }) => {
+    activePlayerId = apId;
+    document.getElementById('win-overlay').classList.add('hidden');
+    document.getElementById('guess-history').innerHTML = '';
+    resetMap();
+    updateTurnIndicator();
+    setGuessInputLocked(myId !== activePlayerId);
+    startTimerBar(30);
+});
+
 // --- Play again ---
 document.getElementById('play-again-btn').addEventListener('click', () => {
+    socket.emit('playAgain');
+    document.getElementById('play-again-btn').disabled = true;
+    document.getElementById('play-again-btn').textContent = 'Waiting for opponent...';
+});
+
+document.getElementById('home-btn').addEventListener('click', () => {
     location.reload();
 });
 
@@ -161,7 +191,7 @@ function stopTimerBar() {
 }
 
 // --- Guess history ---
-function addGuessToHistory(name, distance, color) {
+function addGuessToHistory(name, distance, color, adjacent) {
     const li = document.createElement('li');
     li.className = 'guess-item';
     li.innerHTML = `
@@ -169,6 +199,13 @@ function addGuessToHistory(name, distance, color) {
         <span class="guess-country">${name}</span>
         <span class="guess-distance">${distance === 0 ? '✓' : distance.toLocaleString() + ' km'}</span>
     `;
+    if (adjacent) {
+        const tag = document.createElement('div');
+        tag.className = 'adjacent-tag';
+        tag.textContent = '🤝 Borders mystery country!';
+        li.appendChild(tag);
+        showToast('This country borders the mystery country!');
+    }
     const list = document.getElementById('guess-history');
     list.insertBefore(li, list.firstChild);
 }

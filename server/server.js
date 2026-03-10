@@ -70,6 +70,7 @@ io.on('connection', (socket) => {
             name: guess.name,
             distance: guess.distance,
             color: guess.color,
+            adjacent: guess.adjacent,
             correct,
         });
 
@@ -101,6 +102,32 @@ io.on('connection', (socket) => {
         });
 
         startRoomTimer(code);
+    });
+
+    socket.on('playAgain', () => {
+        const code = socket.data.roomCode;
+        if (!code) return;
+        const room = gm.getRoom(code);
+        if (!room) return;
+
+        // Track who wants to play again
+        if (!room.playAgainVotes) room.playAgainVotes = new Set();
+        room.playAgainVotes.add(socket.id);
+
+        // Tell the other player someone wants to play again
+        socket.to(code).emit('opponentWantsPlayAgain');
+
+        // If both players want to play again
+        if (room.playAgainVotes.size === 2) {
+            room.playAgainVotes.clear();
+            const result = gm.resetRoom(code);
+            if (result.error) return;
+            const active = gm.getActivePlayer(gm.getRoom(code));
+            io.to(code).emit('gameRestart', {
+                activePlayerId: active.id,
+            });
+            startRoomTimer(code);
+        }
     });
 
     socket.on('disconnect', () => {

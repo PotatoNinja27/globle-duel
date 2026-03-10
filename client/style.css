@@ -307,3 +307,24 @@ button:disabled { background: #2a3a55; color: #8899aa; cursor: not-allowed; }
 #win-target { font-size: 1rem; color: #8899aa; }
 
 #play-again-btn { margin-top: 8px; }
+
+.adjacent-tag {
+    font-size: 0.75rem;
+    color: #4fc3f7;
+    width: 100%;
+    margin-top: 4px;
+}
+
+/* floating toast for adjacency message */
+.adjacent-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(76,175,80,0.9);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    z-index: 1000;
+}

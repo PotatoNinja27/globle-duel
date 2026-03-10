@@ -33,6 +33,20 @@ export async function initMap() {
     const container = document.getElementById('globe-container');
     container.innerHTML = '';
 
+    // zoom / pan state
+    let scale = 1;
+    let offsetX = 0;
+    let offsetY = 0;
+    let dragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+
+    function applyTransform() {
+        if (svgDoc) {
+            svgDoc.style.transform = `translate(${offsetX}px,${offsetY}px) scale(${scale})`;
+        }
+    }
+
     const [svgRes, countryRes] = await Promise.all([
         fetch('/world.svg'),
         fetch('/countries.json')
@@ -44,6 +58,64 @@ export async function initMap() {
     svgDoc.setAttribute('viewBox', '30.767 241.591 784.077 458.627');
     svgDoc.style.width = '100%';
     svgDoc.style.height = '100%';
+    svgDoc.style.transformOrigin = '0 0';
+    svgDoc.style.cursor = 'grab';
+
+    // make paths clickable (iso2 -> iso3 lookup)
+    const ISO2_TO_ISO3 = {};
+    Object.entries(ISO3_TO_ISO2).forEach(([iso3, iso2]) => {
+        ISO2_TO_ISO3[iso2.toUpperCase()] = iso3;
+    });
+    svgDoc.querySelectorAll('[id]').forEach(el => {
+        const iso2 = el.id.toUpperCase();
+        const iso3 = ISO2_TO_ISO3[iso2];
+        if (!iso3) return;
+        el.style.cursor = 'pointer';
+        // hover feedback only — no click submission
+    });
+
+    // register interaction handlers on the container
+    container.addEventListener('wheel', e => {
+        e.preventDefault();
+        const rect = container.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        // calculate what SVG point is under the cursor before zoom
+        const svgX = (mouseX - offsetX) / scale;
+        const svgY = (mouseY - offsetY) / scale;
+        
+        // update scale
+        const delta = e.deltaY > 0 ? -0.2 : 0.2;
+        const newScale = Math.max(0.5, Math.min(4, scale + delta));
+        
+        // recalculate offset so the same SVG point stays under the cursor
+        offsetX = mouseX - svgX * newScale;
+        offsetY = mouseY - svgY * newScale;
+        scale = newScale;
+        
+        applyTransform();
+    });
+    container.addEventListener('mousedown', e => {
+        dragging = true;
+        dragStartX = e.clientX - offsetX;
+        dragStartY = e.clientY - offsetY;
+        container.style.cursor = 'grabbing';
+    });
+    container.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        offsetX = e.clientX - dragStartX;
+        offsetY = e.clientY - dragStartY;
+        applyTransform();
+    });
+    container.addEventListener('mouseup', () => {
+        dragging = false;
+        container.style.cursor = 'grab';
+    });
+    container.addEventListener('mouseleave', () => {
+        dragging = false;
+        container.style.cursor = 'grab';
+    });
 
     const data = await countryRes.json();
     COUNTRY_LIST.length = 0;

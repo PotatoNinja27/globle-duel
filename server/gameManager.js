@@ -76,6 +76,7 @@ function processGuess(code, playerId, iso) {
         name: countries[upperIso].name,
         distance: distanceInfo.distance,
         color: distanceInfo.color,
+        adjacent: distanceInfo.adjacent || false,
         correct,
     };
 
@@ -137,4 +138,17 @@ function removePlayer(playerId) {
     return null;
 }
 
-module.exports = { createRoom, joinRoom, processGuess, advanceTurn, startTimer, clearTimer, getRoom, getActivePlayer, removePlayer };
+function resetRoom(code) {
+    const room = rooms[code];
+    if (!room) return { error: 'Room not found' };
+    clearTimer(room);
+    room.target = pickTarget();
+    room.guesses = [];
+    room.status = 'active';
+    room.activeIndex = 0;
+    room.secondsLeft = 30;
+    console.log(`[${code}] Room reset. New target: ${room.target}`);
+    return { ok: true, room };
+}
+
+module.exports = { createRoom, joinRoom, processGuess, advanceTurn, startTimer, clearTimer, getRoom, getActivePlayer, removePlayer, resetRoom };
