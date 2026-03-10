@@ -328,3 +328,109 @@ button:disabled { background: #2a3a55; color: #8899aa; cursor: not-allowed; }
     font-size: 0.9rem;
     z-index: 1000;
 }
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 1024px) {
+    #main-area {
+        flex-direction: column !important;
+    }
+    #map-wrap {
+        width: 100% !important;
+        height: 50vh !important;
+    }
+    #sidebar {
+        width: 100% !important;
+        height: 50vh !important;
+        border-left: none !important;
+        border-top: 1px solid #2a3a55 !important;
+    }
+    .lobby-box {
+        min-width: 90vw !important;
+        padding: 32px 20px !important;
+    }
+    .lobby-box h1 { font-size: 1.8rem; }
+    .room-code-display { font-size: 2rem; letter-spacing: 4px; }
+    .win-box {
+        min-width: 90vw !important;
+        padding: 32px 20px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        height: 100vh;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+    
+    .lobby-box {
+        min-width: 95vw !important;
+        max-width: 100% !important;
+        padding: 24px 16px !important;
+    }
+    .lobby-box h1 { font-size: 1.6rem; }
+    .lobby-box input[type="text"] { font-size: 16px; }
+    button { padding: 14px; font-size: 16px; }
+    
+    #top-bar {
+        flex-direction: column !important;
+        gap: 8px !important;
+        padding: 8px !important;
+    }
+    #turn-indicator { font-size: 0.9rem !important; }
+    #timer-label { font-size: 1rem !important; }
+    
+    #map-wrap {
+        width: 100% !important;
+        height: 45vh !important;
+    }
+    #globe-container svg {
+        width: 100%;
+        height: 100%;
+    }
+    
+    #sidebar {
+        width: 100% !important;
+        height: 55vh !important;
+        border-left: none !important;
+        border-top: 1px solid #2a3a55 !important;
+        padding: 12px !important;
+    }
+    #sidebar h3 { font-size: 0.8rem; }
+    
+    #guess-input-wrap {
+        flex-direction: column !important;
+    }
+    #guess-input { font-size: 16px; }
+    
+    .guess-item { padding: 6px 8px; font-size: 0.85rem; }
+    .guess-color-dot { width: 12px; height: 12px; }
+    .guess-distance { font-size: 0.75rem; }
+    
+    .room-code-display { 
+        font-size: 2rem; 
+        letter-spacing: 3px; 
+        padding: 12px 20px;
+    }
+    
+    .win-box {
+        min-width: 90vw !important;
+        max-width: 100% !important;
+        padding: 24px 16px !important;
+    }
+    #win-title { font-size: 1.5rem; }
+    #win-target { font-size: 0.9rem; }
+}
+
+/* Prevent zoom on input focus on mobile */
+@media (max-width: 768px) {
+    input[type="text"],
+    button {
+        font-size: 16px !important;
+    }
+}
+
+/* Touch-action to prevent default scrolling on map */
+#globe-container {
+    touch-action: manipulation;
+}

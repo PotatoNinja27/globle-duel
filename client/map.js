@@ -96,6 +96,7 @@ export async function initMap() {
         
         applyTransform();
     });
+    // mouse events for desktop
     container.addEventListener('mousedown', e => {
         dragging = true;
         dragStartX = e.clientX - offsetX;
@@ -115,6 +116,53 @@ export async function initMap() {
     container.addEventListener('mouseleave', () => {
         dragging = false;
         container.style.cursor = 'grab';
+    });
+
+    // touch events for mobile
+    let lastTouchDistance = 0;
+    container.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) {
+            // single finger = pan
+            dragging = true;
+            dragStartX = e.touches[0].clientX - offsetX;
+            dragStartY = e.touches[0].clientY - offsetY;
+        } else if (e.touches.length === 2) {
+            // two fingers = pinch zoom
+            dragging = false;
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            lastTouchDistance = Math.sqrt(dx * dx + dy * dy);
+        }
+    });
+    container.addEventListener('touchmove', e => {
+        e.preventDefault();
+        if (e.touches.length === 1 && dragging) {
+            // pan
+            offsetX = e.touches[0].clientX - dragStartX;
+            offsetY = e.touches[0].clientY - dragStartY;
+            applyTransform();
+        } else if (e.touches.length === 2) {
+            // pinch zoom
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const newDistance = Math.sqrt(dx * dx + dy * dy);
+            const rect = container.getBoundingClientRect();
+            const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+            const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+            const svgX = (centerX - offsetX) / scale;
+            const svgY = (centerY - offsetY) / scale;
+            const zoomFactor = newDistance / (lastTouchDistance || newDistance);
+            const newScale = Math.max(0.5, Math.min(4, scale * zoomFactor));
+            offsetX = centerX - svgX * newScale;
+            offsetY = centerY - svgY * newScale;
+            scale = newScale;
+            lastTouchDistance = newDistance;
+            applyTransform();
+        }
+    });
+    container.addEventListener('touchend', () => {
+        dragging = false;
+        lastTouchDistance = 0;
     });
 
     const data = await countryRes.json();

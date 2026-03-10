@@ -2,6 +2,13 @@ import { initMap, colorCountry, resetMap } from './map.js';
 
 const socket = io();
 
+// Disable text selection on mobile for better gesture control
+document.addEventListener('selectstart', e => {
+    if (e.target.closest('#game-screen')) {
+        e.preventDefault();
+    }
+});
+
 // --- State ---
 let myId = null;
 let myName = '';
